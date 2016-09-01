@@ -5,6 +5,10 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.joda.time.DateTime;
@@ -43,18 +47,18 @@ public class LoadTwits {
     }
 
     Configuration conf = HBaseConfiguration.create();
-    HBaseAdmin admin = new HBaseAdmin(conf);
+    Connection connect = ConnectionFactory.createConnection(conf);
+    Admin admin = connect.getAdmin();
 
-    if (!admin.tableExists(UsersDAO.TABLE_NAME) ||
-        !admin.tableExists(TwitsDAO.TABLE_NAME)) {
+    if (!admin.tableExists(TableName.valueOf(UsersDAO.TABLE_NAME)) ||
+        !admin.tableExists(TableName.valueOf(TwitsDAO.TABLE_NAME))) {
       System.out.println("Please use the InitTables utility to create " +
                          "destination tables first.");
       System.exit(0);
     }
 
-    HTablePool pool = new HTablePool(conf, Integer.MAX_VALUE);
-    UsersDAO users = new UsersDAO(pool);
-    TwitsDAO twits = new TwitsDAO(pool);
+    UsersDAO users = new UsersDAO(connect);
+    TwitsDAO twits = new TwitsDAO(connect);
 
     int count = Integer.parseInt(args[0]);
     List<String> words = LoadUtils.readResource(LoadUtils.WORDS_PATH);
@@ -65,7 +69,7 @@ public class LoadTwits {
       }
     }
 
-    pool.closeTablePool(UsersDAO.TABLE_NAME);
+    connect.close();
   }
 
 }

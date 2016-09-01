@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTableInterface;
@@ -12,6 +14,7 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
 
@@ -30,9 +33,9 @@ public class UsersDAO {
 
   private static final Logger log = Logger.getLogger(UsersDAO.class);
 
-  private HTablePool pool;
+  private Connection pool;
 
-  public UsersDAO(HTablePool pool) {
+  public UsersDAO(Connection pool) {
     this.pool = pool;
   }
 
@@ -48,10 +51,10 @@ public class UsersDAO {
     log.debug(String.format("Creating Put for %s", u));
 
     Put p = new Put(Bytes.toBytes(u.user));
-    p.add(INFO_FAM, USER_COL, Bytes.toBytes(u.user));
-    p.add(INFO_FAM, NAME_COL, Bytes.toBytes(u.name));
-    p.add(INFO_FAM, EMAIL_COL, Bytes.toBytes(u.email));
-    p.add(INFO_FAM, PASS_COL, Bytes.toBytes(u.password));
+    p.addColumn(INFO_FAM, USER_COL, Bytes.toBytes(u.user));
+    p.addColumn(INFO_FAM, NAME_COL, Bytes.toBytes(u.name));
+    p.addColumn(INFO_FAM, EMAIL_COL, Bytes.toBytes(u.email));
+    p.addColumn(INFO_FAM, PASS_COL, Bytes.toBytes(u.password));
     return p;
   }
 
@@ -60,7 +63,7 @@ public class UsersDAO {
                           byte[] qual,
                           byte[] val) {
     Put p = new Put(Bytes.toBytes(username));
-    p.add(fam, qual, val);
+    p.addColumn(fam, qual, val);
     return p;
   }
 
@@ -83,7 +86,7 @@ public class UsersDAO {
                       String password)
     throws IOException {
 
-    HTableInterface users = pool.getTable(TABLE_NAME);
+    Table users = pool.getTable(TableName.valueOf(TABLE_NAME));
 
     Put p = mkPut(new User(user, name, email, password));
     users.put(p);
@@ -93,7 +96,7 @@ public class UsersDAO {
 
   public HBaseIA.TwitBase.model.User getUser(String user)
     throws IOException {
-    HTableInterface users = pool.getTable(TABLE_NAME);
+    Table users = pool.getTable(TableName.valueOf(TABLE_NAME));
 
     Get g = mkGet(user);
     Result result = users.get(g);
@@ -108,7 +111,7 @@ public class UsersDAO {
   }
 
   public void deleteUser(String user) throws IOException {
-    HTableInterface users = pool.getTable(TABLE_NAME);
+    Table users = pool.getTable(TableName.valueOf(TABLE_NAME));
 
     Delete d = mkDel(user);
     users.delete(d);
@@ -118,7 +121,7 @@ public class UsersDAO {
 
   public List<HBaseIA.TwitBase.model.User> getUsers()
     throws IOException {
-    HTableInterface users = pool.getTable(TABLE_NAME);
+    Table users = pool.getTable(TableName.valueOf(TABLE_NAME));
 
     ResultScanner results = users.getScanner(mkScan());
     ArrayList<HBaseIA.TwitBase.model.User> ret
@@ -132,7 +135,7 @@ public class UsersDAO {
   }
 
   public long incTweetCount(String user) throws IOException {
-    HTableInterface users = pool.getTable(TABLE_NAME);
+    Table users = pool.getTable(TableName.valueOf(TABLE_NAME));
 
     long ret = users.incrementColumnValue(Bytes.toBytes(user),
                                           INFO_FAM,

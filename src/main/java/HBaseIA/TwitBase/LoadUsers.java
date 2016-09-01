@@ -3,6 +3,11 @@ package HBaseIA.TwitBase;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HTablePool;
 
 import utils.LoadUtils;
@@ -36,8 +41,10 @@ public class LoadUsers {
       System.exit(0);
     }
 
-    HTablePool pool = new HTablePool();
-    UsersDAO dao = new UsersDAO(pool);
+    Configuration conf = HBaseConfiguration.create();
+    Connection connect = ConnectionFactory.createConnection(conf);
+    Admin admin = connect.getAdmin();
+   UsersDAO dao = new UsersDAO(connect);
 
     int count = Integer.parseInt(args[0]);
     List<String> names = LoadUtils.readResource(LoadUtils.NAMES_PATH);
@@ -50,6 +57,6 @@ public class LoadUsers {
       dao.addUser(user, name, email, "abc123");
     }
 
-    pool.closeTablePool(UsersDAO.TABLE_NAME);
+    connect.close();
   }
 }

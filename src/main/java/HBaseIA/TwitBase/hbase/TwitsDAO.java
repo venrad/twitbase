@@ -5,13 +5,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTableInterface;
-import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -27,12 +28,12 @@ public class TwitsDAO {
   public static final byte[] TWIT_COL   = Bytes.toBytes("twit");
   private static final int longLength = 8; // bytes
 
-  private HTablePool pool;
+  private Connection connect;
 
   private static final Logger log = Logger.getLogger(TwitsDAO.class);
 
-  public TwitsDAO(HTablePool pool) {
-    this.pool = pool;
+  public TwitsDAO(Connection connect) {
+    this.connect = connect;
   }
 
   private static byte[] mkRowKey(Twit t) {
@@ -52,8 +53,8 @@ public class TwitsDAO {
 
   private static Put mkPut(Twit t) {
     Put p = new Put(mkRowKey(t));
-    p.add(TWITS_FAM, USER_COL, Bytes.toBytes(t.user));
-    p.add(TWITS_FAM, TWIT_COL, Bytes.toBytes(t.text));
+    p.addColumn(TWITS_FAM, USER_COL, Bytes.toBytes(t.user));
+    p.addColumn(TWITS_FAM, TWIT_COL, Bytes.toBytes(t.text));
     return p;
   }
 
@@ -90,7 +91,7 @@ public class TwitsDAO {
 
   public void postTwit(String user, DateTime dt, String text) throws IOException {
 
-    HTableInterface twits = pool.getTable(TABLE_NAME);
+    Table twits = connect.getTable(TableName.valueOf(TABLE_NAME));
 
     Put p = mkPut(new Twit(user, dt, text));
     twits.put(p);
@@ -100,7 +101,7 @@ public class TwitsDAO {
 
   public HBaseIA.TwitBase.model.Twit getTwit(String user, DateTime dt) throws IOException {
 
-    HTableInterface twits = pool.getTable(TABLE_NAME);
+    Table twits = connect.getTable(TableName.valueOf(TABLE_NAME));
 
     Get g = mkGet(user, dt);
     Result result = twits.get(g);
@@ -114,7 +115,7 @@ public class TwitsDAO {
 
   public List<HBaseIA.TwitBase.model.Twit> list(String user) throws IOException {
 
-    HTableInterface twits = pool.getTable(TABLE_NAME);
+    Table twits = connect.getTable(TableName.valueOf(TABLE_NAME));
 
     ResultScanner results = twits.getScanner(mkScan(user));
     List<HBaseIA.TwitBase.model.Twit> ret = new ArrayList<HBaseIA.TwitBase.model.Twit>();
@@ -130,9 +131,9 @@ public class TwitsDAO {
 
     private Twit(Result r) {
       this(
-           r.getColumnLatest(TWITS_FAM, USER_COL).getValue(),
+           r.getColumnLatestCell(TWITS_FAM, USER_COL).getValueArray(),
            Arrays.copyOfRange(r.getRow(), Md5Utils.MD5_LENGTH, Md5Utils.MD5_LENGTH + longLength),
-           r.getColumnLatest(TWITS_FAM, TWIT_COL).getValue());
+           r.getColumnLatestCell(TWITS_FAM, TWIT_COL).getValueArray());
     }
 
     private Twit(byte[] user, byte[] dt, byte[] text) {

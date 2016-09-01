@@ -3,6 +3,11 @@ package HBaseIA.TwitBase;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.ClusterConnection;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.log4j.Logger;
 import org.joda.time.DateTime;
@@ -26,8 +31,8 @@ public class TwitsTool {
       System.out.println(usage);
       System.exit(0);
     }
-
-    HTablePool pool = new HTablePool();
+    Configuration conf = HBaseConfiguration.create();
+    Connection pool = ConnectionFactory.createConnection(conf);
     TwitsDAO twitsDao = new TwitsDAO(pool);
     UsersDAO usersDao = new UsersDAO(pool);
 
@@ -48,6 +53,6 @@ public class TwitsTool {
       }
     }
 
-    pool.closeTablePool(TwitsDAO.TABLE_NAME);
+    pool.close();
   }
 }

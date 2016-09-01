@@ -7,12 +7,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.Connection;
 import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.Table;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.util.Bytes;
 
@@ -32,9 +35,9 @@ public class RelationsDAO {
 
   private static final int KEY_WIDTH = 2 * Md5Utils.MD5_LENGTH;
 
-  private HTablePool pool;
+  private Connection pool;
 
-  public RelationsDAO(HTablePool pool) {
+  public RelationsDAO(Connection pool) {
     this.pool = pool;
   }
 
@@ -75,11 +78,11 @@ public class RelationsDAO {
 
   public void addRelation(byte[] table, String fromId, String toId) throws IOException {
 
-    HTableInterface t = pool.getTable(table);
+    Table t = pool.getTable(TableName.valueOf(table));
 
     Put p = new Put(mkRowKey(fromId, toId));
-    p.add(RELATION_FAM, FROM, Bytes.toBytes(fromId));
-    p.add(RELATION_FAM, TO, Bytes.toBytes(toId));
+    p.addColumn(RELATION_FAM, FROM, Bytes.toBytes(fromId));
+    p.addColumn(RELATION_FAM, TO, Bytes.toBytes(toId));
     t.put(p);
 
     t.close();
@@ -95,7 +98,7 @@ public class RelationsDAO {
 
   public List<HBaseIA.TwitBase.model.Relation> listRelations(byte[] table, String fromId) throws IOException {
 
-    HTableInterface t = pool.getTable(table);
+    Table t = pool.getTable(TableName.valueOf(table));
     String rel = (Bytes.equals(table, FOLLOWS_TABLE_NAME)) ? "->" : "<-";
 
     byte[] startKey = mkRowKey(fromId);
@@ -120,7 +123,7 @@ public class RelationsDAO {
 
   @SuppressWarnings("unused")
   public long followedByCountScan (String user) throws IOException {
-    HTableInterface followed = pool.getTable(FOLLOWED_TABLE_NAME);
+    Table followed = pool.getTable(TableName.valueOf(FOLLOWED_TABLE_NAME));
 
     final byte[] startKey = Md5Utils.md5sum(user);
     final byte[] endKey = Arrays.copyOf(startKey, startKey.length);
@@ -136,8 +139,8 @@ public class RelationsDAO {
     return sum;
   }
 
-  public long followedByCount (final String userId) throws Throwable {
-    HTableInterface followed = pool.getTable(FOLLOWED_TABLE_NAME);
+  /*public long followedByCount (final String userId) throws Throwable {
+    Table followed = pool.getTable(TableName.valueOf(FOLLOWED_TABLE_NAME));
 
     final byte[] startKey = Md5Utils.md5sum(userId);
     final byte[] endKey = Arrays.copyOf(startKey, startKey.length);
@@ -151,9 +154,11 @@ public class RelationsDAO {
           return instance.followedByCount(userId);
         }
     };
+    
+    followed.coproc
 
     Map<byte[], Long> results =
-      followed.coprocessorExec(
+      followed.coprocessorService(
         RelationCountProtocol.class,
         startKey,
         endKey,
@@ -164,7 +169,7 @@ public class RelationsDAO {
       sum += e.getValue().longValue();
     }
     return sum;
-  }
+  }*/
 
   private static class Relation extends HBaseIA.TwitBase.model.Relation {
 

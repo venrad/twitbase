@@ -3,6 +3,11 @@ package HBaseIA.TwitBase;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.HTablePool;
 import org.apache.log4j.Logger;
 
@@ -28,8 +33,10 @@ public class RelationsTool {
       System.exit(0);
     }
 
-    HTablePool pool = new HTablePool();
-    RelationsDAO dao = new RelationsDAO(pool);
+    Configuration conf = HBaseConfiguration.create();
+    Connection connect = ConnectionFactory.createConnection(conf);
+    Admin admin = connect.getAdmin();
+    RelationsDAO dao = new RelationsDAO(connect);
 
     if ("follows".equals(args[0])) {
       log.debug(String.format("Adding follower %s -> %s", args[1], args[2]));
@@ -56,12 +63,11 @@ public class RelationsTool {
       System.out.println(String.format("%s has %s followers.", args[1], count));
     }
 
-    if ("followedByCoproc".equals(args[0])) {
+/*    if ("followedByCoproc".equals(args[0])) {
       long count = dao.followedByCount(args[1]);
       System.out.println(String.format("%s has %s followers.", args[1], count));
     }
-
-    pool.closeTablePool(RelationsDAO.FOLLOWS_TABLE_NAME);
-    pool.closeTablePool(RelationsDAO.FOLLOWED_TABLE_NAME);
-  }
+*/
+   connect.close();
+   }
 }
