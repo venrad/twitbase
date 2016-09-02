@@ -1,5 +1,5 @@
 # HBase In Action: TwitBase
-
+[ Modified to compile with new HBase 1.1 version onwards ]
 [http://www.manning.com/dimidukkhurana][0]
 
 ## Compiling the project
