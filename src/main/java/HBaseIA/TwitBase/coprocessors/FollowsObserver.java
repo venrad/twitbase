@@ -8,8 +8,10 @@ import static HBaseIA.TwitBase.hbase.RelationsDAO.TO;
 import java.io.IOException;
 
 import org.apache.hadoop.hbase.CoprocessorEnvironment;
+import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.HTablePool;
+import org.apache.hadoop.hbase.client.Connection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.coprocessor.BaseRegionObserver;
 import org.apache.hadoop.hbase.coprocessor.ObserverContext;
@@ -21,11 +23,11 @@ import HBaseIA.TwitBase.hbase.RelationsDAO;
 
 public class FollowsObserver extends BaseRegionObserver {
 
-  private HTablePool pool = null;
+  private Connection pool = null;
 
   @Override
   public void start(CoprocessorEnvironment env) throws IOException {
-    pool = new HTablePool(env.getConfiguration(), Integer.MAX_VALUE);
+    pool = ConnectionFactory.createConnection(HBaseConfiguration.create());
   }
 
   @Override
@@ -33,8 +35,8 @@ public class FollowsObserver extends BaseRegionObserver {
     pool.close();
   }
 
-  @Override
-  public void postPut(
+
+ /* public void postPut(
       final ObserverContext<RegionCoprocessorEnvironment> e,
       final Put put,
       final WALEdit edit,
@@ -53,5 +55,5 @@ public class FollowsObserver extends BaseRegionObserver {
 
     RelationsDAO relations = new RelationsDAO(pool);
     relations.addFollowedBy(to, from);
-  }
+  }*/
 }

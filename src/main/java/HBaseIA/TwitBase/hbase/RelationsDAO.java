@@ -20,7 +20,7 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import utils.Md5Utils;
-import HBaseIA.TwitBase.coprocessors.RelationCountProtocol;
+//import HBaseIA.TwitBase.coprocessors.RelationCountProtocol;
 
 public class RelationsDAO {
 

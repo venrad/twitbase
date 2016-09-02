@@ -9,14 +9,14 @@ import java.util.List;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.coprocessor.BaseEndpointCoprocessor;
+//import org.apache.hadoop.hbase.coprocessor.BaseEndpointCoprocessor;
 import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.filter.PrefixFilter;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
 
 import utils.Md5Utils;
 
-public class RelationCountImpl
+/*public class RelationCountImpl
   extends BaseEndpointCoprocessor implements RelationCountProtocol {
 
   @Override
@@ -42,4 +42,4 @@ public class RelationCountImpl
     scanner.close();
     return sum;
   }
-}
+}*/

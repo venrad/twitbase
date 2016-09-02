@@ -13,7 +13,20 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+      <cdh.hbase.version>1.2.0-cdh5.7.1</cdh.hbase.version>
+  <cdh_version>2.6.0-cdh5.5.0</cdh_version>
+    
   </properties>
+  <repositories>
+    <repository>
+      <id>cloudera</id>
+      <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
+    </repository>
+    <repository>
+      <id>apache release</id>
+      <url>https://repository.apache.org/content/repositories/releases/</url>
+    </repository>
+  </repositories>
 
   <build>
     <plugins>
@@ -46,30 +59,59 @@
     </plugins>
   </build>
 
-  <repositories>
-    <repository>
-      <id>apache release</id>
-      <url>https://repository.apache.org/content/repositories/releases/</url>
-    </repository>
-  </repositories>
-
   <dependencies>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-core</artifactId>
-      <version>1.0.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hbase</groupId>
-      <artifactId>hbase</artifactId>
-      <version>0.92.1</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>maven-release-plugin</artifactId>
-          <groupId>org.apache.maven.plugins</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
+    <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
+<dependency>
+    <groupId>joda-time</groupId>
+    <artifactId>joda-time</artifactId>
+    <version>2.9.4</version>
+</dependency>
+    		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+			<version>${cdh_version}</version>
+
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-hdfs</artifactId>
+			<version>${cdh_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-mapreduce-client-app</artifactId>
+			<version>${cdh_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-mapreduce-client-common</artifactId>
+			<version>${cdh_version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-mapreduce-client-core</artifactId>
+			<version>${cdh_version}</version>
+		</dependency>
+	
+     <dependency>
+     	<groupId>org.apache.hbase</groupId>
+     	<artifactId>hbase-client</artifactId>
+     	<version>${cdh.hbase.version}</version>
+     </dependency>
+     		<dependency>
+			<groupId>org.apache.hbase</groupId>
+			<artifactId>hbase-server</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+<!-- https://mvnrepository.com/artifact/log4j/log4j -->
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.14</version>
+</dependency>
+
+  
     <!-- Hadoop requires commons-io but doesn't list it as an explicit
          or transient dependency. include it manually. -->
     <dependency>

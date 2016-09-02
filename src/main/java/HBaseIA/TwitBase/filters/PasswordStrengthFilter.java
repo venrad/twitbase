@@ -2,6 +2,7 @@ package HBaseIA.TwitBase.filters;
 
 import HBaseIA.TwitBase.hbase.UsersDAO;
 
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.filter.FilterBase;
 import org.apache.hadoop.hbase.util.Bytes;
@@ -23,7 +24,7 @@ public class PasswordStrengthFilter extends FilterBase {
   }
 
   public ReturnCode filterKeyValue(KeyValue v) {
-    if (Bytes.toString(v.getQualifier()).equals(Bytes.toString(UsersDAO.PASS_COL))) {
+    if (Bytes.toString(v.getQualifierArray()).equals(Bytes.toString(UsersDAO.PASS_COL))) {
       if(v.getValueLength() >= len)
         this.filterRow = true;
       return ReturnCode.SKIP;
@@ -45,5 +46,11 @@ public class PasswordStrengthFilter extends FilterBase {
 
   public void readFields(DataInput in) throws IOException {
     this.len = in.readInt();
+  }
+
+  @Override
+  public ReturnCode filterKeyValue(Cell arg0) throws IOException {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
